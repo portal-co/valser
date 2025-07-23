@@ -10,7 +10,7 @@ pub trait ValSer<V>: Sized {
     type Kind;
     fn from_kind<T: Default>(
         k: Self::Kind,
-        i: &mut impl Iterator<Item = ControlFlow<T, V>>,
+        i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
     ) -> ControlFlow<T, Self>;
     fn to_values(self) -> (impl Iterator<Item = V>, Self::Kind);
 }
@@ -26,7 +26,7 @@ impl<V> ValSer<V> for Value<V> {
 
     fn from_kind<T: Default>(
         k: Self::Kind,
-        i: &mut impl Iterator<Item = ControlFlow<T, V>>,
+        i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
     ) -> ControlFlow<T, Self> {
         match i.next() {
             Some(a) => ControlFlow::Continue(Value { value: a? }),
@@ -46,7 +46,7 @@ impl<V, A: ValSer<V>, B: ValSer<V>> ValSer<V> for (A, B) {
 
     fn from_kind<T: Default>(
         k: Self::Kind,
-        i: &mut impl Iterator<Item = ControlFlow<T, V>>,
+        i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
     ) -> ControlFlow<T, Self> {
         let a = A::from_kind::<T>(k.0, i)?;
         let b = B::from_kind::<T>(k.1, i)?;
@@ -67,7 +67,7 @@ impl<V, A: ValSer<V>, B: ValSer<V>> ValSer<V> for Either<A, B> {
 
     fn from_kind<T: Default>(
         k: Self::Kind,
-        i: &mut impl Iterator<Item = ControlFlow<T, V>>,
+        i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
     ) -> ControlFlow<T, Self> {
         match k {
             Either::Left(k) => ControlFlow::Continue(Either::Left(A::from_kind(k, i)?)),
@@ -96,7 +96,7 @@ impl<V, A: ValSer<V>, const N: usize> ValSer<V> for [A; N] {
 
     fn from_kind<T: Default>(
         k: Self::Kind,
-        i: &mut impl Iterator<Item = ControlFlow<T, V>>,
+        i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
     ) -> ControlFlow<T, Self> {
         let mut xs = [const { MaybeUninit::uninit() }; N];
         for (k, x) in k.into_iter().zip(xs.iter_mut()) {
@@ -135,7 +135,7 @@ const _: () = {
 
         fn from_kind<T: Default>(
             k: Self::Kind,
-            i: &mut impl Iterator<Item = ControlFlow<T, V>>,
+            i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
         ) -> ControlFlow<T, Self> {
             let mut a = Vec::new();
             for k in k.into_iter() {
@@ -163,7 +163,7 @@ const _: () = {
 
         fn from_kind<T: Default>(
             k: Self::Kind,
-            i: &mut impl Iterator<Item = ControlFlow<T, V>>,
+            i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
         ) -> ControlFlow<T, Self> {
             let mut a = BTreeMap::new();
             for (l, k) in k.into_iter() {
