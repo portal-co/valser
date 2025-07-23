@@ -1,6 +1,10 @@
 #![no_std]
 
-use core::{iter::once, mem::MaybeUninit, ops::ControlFlow};
+use core::{
+    iter::{empty, once},
+    mem::MaybeUninit,
+    ops::ControlFlow,
+};
 
 use either::Either;
 
@@ -16,6 +20,25 @@ pub trait ValSer<V>: Sized {
 }
 pub trait AnyKind {
     type Value<V>: ValSer<V, Kind = Self>;
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct NoValues;
+impl<V> ValSer<V> for () {
+    type Kind = NoValues;
+
+    fn from_kind<T: Default>(
+        k: Self::Kind,
+        i: &mut (dyn Iterator<Item = ControlFlow<T, V>> + '_),
+    ) -> ControlFlow<T, Self> {
+        ControlFlow::Continue(())
+    }
+
+    fn to_values(self) -> (impl Iterator<Item = V>, Self::Kind) {
+        (empty(), NoValues)
+    }
+}
+impl AnyKind for NoValues {
+    type Value<V> = ();
 }
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
