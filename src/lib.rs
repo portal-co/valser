@@ -18,6 +18,7 @@ pub trait AnyKind {
     type Value<V>: ValSer<V, Kind = Self>;
 }
 #[repr(transparent)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Value<V> {
     pub value: V,
 }
@@ -155,7 +156,7 @@ const _: () = {
             (is.into_iter().flatten(), ks)
         }
     }
-    impl<A: AnyKind> AnyKind for Vec<A>{
+    impl<A: AnyKind> AnyKind for Vec<A> {
         type Value<V> = Vec<A::Value<V>>;
     }
     impl<K: Ord, V, A: ValSer<V>> ValSer<V> for BTreeMap<K, A> {
@@ -183,7 +184,7 @@ const _: () = {
             (is.into_iter().flatten(), ks)
         }
     }
-    impl<K: Ord,A: AnyKind> AnyKind for BTreeMap<K,A>{
-        type Value<V> = BTreeMap<K,A::Value<V>>;
+    impl<K: Ord, A: AnyKind> AnyKind for BTreeMap<K, A> {
+        type Value<V> = BTreeMap<K, A::Value<V>>;
     }
 };
