@@ -1,13 +1,14 @@
 # valser
 
 ## Description
-Project valser
+"Structure schema library for Rust" (`valser`). Likely for validating or serializing data structures.
 
 ## Goals
-- [ ] Add project goals
+- [ ] Define data schemas
+- [ ] Validate structures
 
 ## Progress
-- [ ] Initial setup
+- [ ] Crate initialized
 
 ---
 *AI assisted*
